@@ -31,16 +31,46 @@ def bulk_upload_page(model):
         
         features = ["Annual Income (k$)", "Spending Score (1-100)"]
         
-        if set(features).issubset(df.columns):
-            clusters = model.predict(df[features])
-            relatable_clusters = [c+1 for c in clusters]
-            df["Group"] = relatable_clusters
+        if st.button("Predict Segments"):
+        
+            if set(features).issubset(df.columns):
+                clusters = model.predict(df[features])
+                relatable_clusters = [c+1 for c in clusters]
+                df["Group"] = relatable_clusters
+                
+                st.success("Analysis Complete!")
+                st.dataframe(df, use_container_width=True)
+                
+                data = {
+    "Cluster": [
+        "Cluster 1(Red)","Cluster 2(Blue)","Cluster 3(Green)","Cluster 4 (Orange)","Cluster 5 (Purple)"
+    ],"Persona": [
+        "Middle-Aged Centrists","Established High Spenders","Trend Chasers","High earners/Mature Savers","The Budget-Conscious"
+    ],"Financial Context": [
+        "Mid Income / Mid Spending","High Income / High Spending","Low Income / High Spending","High Income/Low Spending","Low Income / Low Spending"
+    ],"Age & Engagement Profile": [
+        "The most populous group (Age 40 - 60). Their spending is moderate and predictable.",
+        "Age 30 - 39. They balance high earning power with high consumption.",
+        "Likely young spenders. They probably have the highest engagement and are likely the primary drivers of trend-based revenue.",
+        "High-earning individuals. Despite their wealth, they show the lowest spending engagement.",
+        "Probably youngsters starting out in the workforce or retired seniors on fixed income."
+    ]
+}
+
+                # Create DataFrame
+                df = pd.DataFrame(data)
+                
+                # Display in Streamlit
+                st.title("Customer Segmentation Data")
+                st.dataframe(df, use_container_width=True)
+                
+                output_csv = df.to_csv(index=False).encode("utf-8")
+                st.download_button("Download Predicted Results", output_csv, 
+                                   "segmented_customers.csv", mime="text/csv")
             
-            st.success("Analysis Complete!")
-            st.dataframe(df, use_container_width=True)
             
-            output_csv = df.to_csv(index=False).encode("utf-8")
-            st.download_button("Download Predicted Results", output_csv, 
-                               "segmented_customers.csv", mime="text/csv")
-        else:
-            st.error(f"Error: CSV must contain these exact headers: {features}")
+            else:
+                st.error(f"Error: CSV must contain these exact headers: {features}")
+        
+        
+        
